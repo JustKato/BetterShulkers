@@ -1,5 +1,7 @@
 # Better Shulkers
 
+![BetterShulkersLogo](./better_shulkers.png)
+
 A Spigot plugin that allows players to directly access the contents of a ShulkerBox by dropping it while sneaking.
 
 ## Features
