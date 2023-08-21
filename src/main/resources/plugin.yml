@@ -1,0 +1,12 @@
+name: BetterShulkers
+version: '${project.version}'
+main: com.danlegt.bettershulkers.BetterShulkers
+api-version: '1.20'
+prefix: BetterShulkers
+authors: [Daniel Legt]
+description: Enhance shulkers with the ability to modify their contents from within your inventory
+website: https://danlegt.com
+permissions:
+  bettershulkers.shulkerboxaccess:
+    default: true
+    description: "Allows dropping of shulker boxes to access their contents."
