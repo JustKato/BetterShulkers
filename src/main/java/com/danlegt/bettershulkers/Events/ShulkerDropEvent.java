@@ -1,8 +1,5 @@
 package com.danlegt.bettershulkers.Events;
 
-import com.danlegt.bettershulkers.BetterShulkers;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.ShulkerBox;
@@ -10,7 +7,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
@@ -22,16 +18,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ShulkerDropEvent implements Listener {
 
     public static List<Inventory> shulkerInventoryBinds = new ArrayList<>();
-    //ArrayList to prevent players from opening and placing Shulkers at the same time to stop duping
-    private static ArrayList<Player> blockedPlayers = new ArrayList<>();
-    private static ArrayList<Player> openShulkers = new ArrayList<>();
 
     // React each time a shulker is dropped
     @EventHandler(priority = EventPriority.LOWEST)
@@ -66,49 +57,12 @@ public class ShulkerDropEvent implements Listener {
         // Mark the inventory as a shulker listener
         shulkerInventoryBinds.add(inv);
 
-        //Prevent player from dropping this Shulker or moving it in inventory
-        openShulkers.add(p);
         // Open the inventory of the shulker for the player
         p.openInventory(inv);
         // Play open sound
         p.playSound(p.getLocation(), Sound.BLOCK_SHULKER_BOX_OPEN, SoundCategory.BLOCKS, 1f, 1.25f);
         // Cancel the throw event
         ev.setCancelled(true);
-        //block placer from placing the same shulker
-        blockedPlayers.add(p);
-
-        Bukkit.getScheduler().runTaskLaterAsynchronously(BetterShulkers.getINSTANCE(), new Runnable() {
-            public void run() {
-                blockedPlayers.remove(p);
-            }
-        }, 1L);
-
-    }
-
-    @EventHandler
-    public void onPlayerDropOpenedShulker(PlayerDropItemEvent ev) {
-        Player p = ev.getPlayer();
-        if (!(openShulkers.contains(p))) return;
-        var item = p.getInventory().getItemInMainHand();
-        if (item.equals(ev.getItemDrop().getItemStack())) ev.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onMoveOpenedShulkers(InventoryClickEvent ev) {
-        if (!(ev.getWhoClicked() instanceof Player p)) return;
-        if(!openShulkers.contains(p)) return;
-        var item = p.getInventory().getItemInMainHand();
-        if (item.equals(ev.getCurrentItem())) ev.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onShulkerPlace(BlockPlaceEvent ev) {
-        Player p = ev.getPlayer();
-        if (!(ev.getBlockPlaced().getState() instanceof ShulkerBox)) return;
-
-        // Check if player is in list containing players that opened shulker 1 tick ago
-        if (blockedPlayers.contains(p)) ev.setCancelled(true);
-
     }
 
     @EventHandler
@@ -120,7 +74,6 @@ public class ShulkerDropEvent implements Listener {
 
         handleInventoryShananigans(inv, item);
         p.playSound(p.getLocation(), Sound.BLOCK_SHULKER_BOX_OPEN, SoundCategory.BLOCKS, 1f, 1.25f);
-        openShulkers.remove(p);
     }
 
     @EventHandler
