@@ -37,7 +37,6 @@ public class SafetyEvents implements Listener {
 
         // Make sure the item that is being moved is not the shulker.
         if ( itemRef.equals(ev.getCurrentItem()) ) {
-            Bukkit.broadcastMessage("Shulker Moved");
             ev.setCancelled(true);
         }
     }
