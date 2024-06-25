@@ -1,5 +1,6 @@
 package com.danlegt.bettershulkers.Events;
 
+import com.danlegt.bettershulkers.BetterShulkers;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.ShulkerBox;
@@ -59,6 +60,10 @@ public class ShulkerDropEvent implements Listener {
 
         // Open the inventory of the shulker for the player
         p.openInventory(inv);
+
+        // Increment shulker open metric
+        BetterShulkers.me.incrementShulkersOpened();
+
         // Play open sound
         p.playSound(p.getLocation(), Sound.BLOCK_SHULKER_BOX_OPEN, SoundCategory.BLOCKS, 1f, 1.25f);
         // Cancel the throw event
