@@ -1,6 +1,7 @@
 package com.danlegt.bettershulkers.Events;
 
 import com.danlegt.bettershulkers.BetterShulkers;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.ShulkerBox;
@@ -8,9 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryInteractEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -18,10 +17,11 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ShulkerDropEvent implements Listener {
+
+    public static Map<Player, ItemStack> openShulkerPlayerMap = new HashMap<>();
 
     public static List<Inventory> shulkerInventoryBinds = new ArrayList<>();
 
@@ -61,6 +61,9 @@ public class ShulkerDropEvent implements Listener {
         // Open the inventory of the shulker for the player
         p.openInventory(inv);
 
+        // Mark this shulker as the opened shulker
+        openShulkerPlayerMap.put(p, item);
+
         // Increment shulker open metric
         BetterShulkers.me.incrementShulkersOpened();
 
@@ -77,8 +80,9 @@ public class ShulkerDropEvent implements Listener {
         var item = ev.getPlayer().getInventory().getItemInMainHand();
         if (!(ev.getPlayer() instanceof Player p)) return;
 
-        handleInventoryShananigans(inv, item);
+        handleInventoryShananigans(p, inv, item);
         p.playSound(p.getLocation(), Sound.BLOCK_SHULKER_BOX_OPEN, SoundCategory.BLOCKS, 1f, 1.25f);
+        openShulkerPlayerMap.remove(p);
     }
 
     @EventHandler
@@ -88,7 +92,7 @@ public class ShulkerDropEvent implements Listener {
         if (!(ev.getWhoClicked() instanceof Player p)) return;
         var item = p.getInventory().getItemInMainHand();
 
-        handleInventoryShananigans(inv, item);
+        handleInventoryShananigans(p, inv, item);
     }
 
     @EventHandler
@@ -98,10 +102,19 @@ public class ShulkerDropEvent implements Listener {
         if (!(ev.getWhoClicked() instanceof Player p)) return;
         var item = p.getInventory().getItemInMainHand();
 
-        handleInventoryShananigans(inv, item);
+        handleInventoryShananigans(p, inv, item);
     }
 
-    private static void handleInventoryShananigans(Inventory inv, ItemStack item) {
+    private static void handleInventoryShananigans(Player p, Inventory inv, ItemStack item) {
+
+        // ! Check that this is the correct Shulker
+        if ( Objects.isNull(item) || Objects.isNull(openShulkerPlayerMap.get(p)) || !openShulkerPlayerMap.get(p).equals(item) ) {
+            Bukkit.getLogger().warning("Player " + p.getName() + " has tried to duplicate, or has accidentally switched shulker boxes");
+            openShulkerPlayerMap.remove(p);
+            shulkerInventoryBinds.remove(inv);
+            p.closeInventory();
+            return;
+        }
 
         // Get the meta of the item
         var meta = item.getItemMeta();
@@ -119,6 +132,8 @@ public class ShulkerDropEvent implements Listener {
         bsm.setBlockState(sm);
         // Finally, apply the updated BlockStateMeta back to the original item
         item.setItemMeta(bsm);
+
+        openShulkerPlayerMap.put(p, p.getInventory().getItemInMainHand());
     }
 
     private static ShulkerBox getShulkerMeta(@Nonnull ItemMeta meta) {
