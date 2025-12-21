@@ -16,7 +16,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 
 public class ShulkerDropEvent implements Listener {
@@ -136,7 +135,7 @@ public class ShulkerDropEvent implements Listener {
         openShulkerPlayerMap.put(p, p.getInventory().getItemInMainHand());
     }
 
-    private static ShulkerBox getShulkerMeta(@Nonnull ItemMeta meta) {
+    private static ShulkerBox getShulkerMeta(ItemMeta meta) {
         if (!(meta instanceof BlockStateMeta bsm)) return null;
         var csm = bsm.getBlockState();
         if (!(csm instanceof ShulkerBox sb)) return null;
