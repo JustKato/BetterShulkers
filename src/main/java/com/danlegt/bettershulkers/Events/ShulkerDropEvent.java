@@ -42,6 +42,7 @@ public class ShulkerDropEvent implements Listener {
         p.openInventory(inv);
         openShulkerPlayerMap.put(p, item);
         BetterShulkers.me.incrementShulkersOpened();
+        BetterShulkers.me.recordShulkerColor(item.getType().name());
         p.playSound(p.getLocation(), Sound.BLOCK_SHULKER_BOX_OPEN, SoundCategory.BLOCKS, 1f, 1.25f);
         ev.setCancelled(true);
     }
@@ -80,6 +81,7 @@ public class ShulkerDropEvent implements Listener {
     static void handleInventoryShananigans(Player p, Inventory inv, ItemStack item) {
         if (Objects.isNull(item) || Objects.isNull(openShulkerPlayerMap.get(p)) || !openShulkerPlayerMap.get(p).equals(item)) {
             Bukkit.getLogger().warning("Player " + p.getName() + " has tried to duplicate, or has accidentally switched shulker boxes");
+            BetterShulkers.me.incrementDupeAttempts();
             openShulkerPlayerMap.remove(p);
             shulkerInventoryBinds.remove(inv);
             p.closeInventory();
