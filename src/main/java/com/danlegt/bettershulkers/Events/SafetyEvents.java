@@ -1,6 +1,6 @@
 package com.danlegt.bettershulkers.Events;
 
-import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,50 +13,24 @@ public class SafetyEvents implements Listener {
 
     @EventHandler
     public void onPlayerDropOpenedShulker(PlayerDropItemEvent ev) {
-        // Get the currently open inventory
-        var openedInventory = ev.getPlayer().getOpenInventory();
-
-        // Check if the currently open inventory is a shulker
-        if ( openedInventory.getType().equals(InventoryType.SHULKER_BOX) )
-            // Cancel the event
+        if (ev.getPlayer().getOpenInventory().getType().equals(InventoryType.SHULKER_BOX))
             ev.setCancelled(true);
     }
 
     @EventHandler
     public void onMoveOpenedShulkers(InventoryClickEvent ev) {
-        if ( !(ev.getWhoClicked() instanceof Player p) )
-            return;
-
-        var itemRef = p.getInventory().getItemInMainHand();
+        if (!(ev.getWhoClicked() instanceof Player p)) return;
         var invRef = ev.getInventory();
+        if (!invRef.getType().equals(InventoryType.SHULKER_BOX)) return;
 
-        // Check if this is even a shulker inventory
-        if ( !invRef.getType().equals(InventoryType.SHULKER_BOX) )
-            return;
-
-        // Make sure the item that is being moved is not the shulker.
-        if ( itemRef.equals(ev.getCurrentItem()) ) {
+        if (p.getInventory().getItemInMainHand().equals(ev.getCurrentItem()))
             ev.setCancelled(true);
-        }
     }
 
     @EventHandler
     public void onShulkerPlace(BlockPlaceEvent ev) {
-        var blockPlaced = ev.getBlockPlaced();
-
-        // Check if the block being placed is even a shulker
-        if ( !(blockPlaced.getType().equals(Material.SHULKER_BOX)) )
-            return;
-
-        // Get the currently open inventory
-        var openedInventory = ev.getPlayer().getOpenInventory();
-
-        // Check if the currently open inventory is a shulker
-        if ( openedInventory.getType().equals(InventoryType.SHULKER_BOX) )
-            // Cancel the event
+        if (!Tag.SHULKER_BOXES.isTagged(ev.getBlockPlaced().getType())) return;
+        if (ev.getPlayer().getOpenInventory().getType().equals(InventoryType.SHULKER_BOX))
             ev.setCancelled(true);
-
     }
-
-
 }
