@@ -10,11 +10,7 @@ import org.bukkit.SoundCategory;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryAction;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -204,14 +200,14 @@ class ShulkerDropEventTest {
     }
 
     @Test
-    void dupeProtection_closesInventoryWhenItemChanged() {
+    void dupeProtection_closesInventoryWhenItemChangedOnClose() {
         var item = shulkerItem();
         var player = mockPlayer(item);
         dropEvent(player, item, true);
 
         var inv = ShulkerDropEvent.shulkerInventoryBinds.iterator().next();
 
-        // Swap main hand to a different item
+        // Swap main hand to a different item before close — simulates picking up the shulker
         var dirt = new StubItemStack(Material.DIRT, null);
         when(player.getInventory().getItemInMainHand()).thenReturn(dirt);
 
@@ -219,9 +215,7 @@ class ShulkerDropEventTest {
         when(view.getPlayer()).thenReturn(player);
         when(view.getTopInventory()).thenReturn(inv);
 
-        var clickEvent = new InventoryClickEvent(view, InventoryType.SlotType.CONTAINER, 0,
-                ClickType.LEFT, InventoryAction.PICKUP_ONE);
-        listener.onShulkerInventoryClick(clickEvent);
+        listener.onShulkerInventoryClose(new InventoryCloseEvent(view));
 
         assertFalse(ShulkerDropEvent.openShulkerPlayerMap.containsKey(player), "Dupe protection should remove player");
         verify(player).closeInventory();
